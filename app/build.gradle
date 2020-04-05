@@ -26,4 +26,17 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation 'org.litepal.android:java:3.0.0'
+    //开源库LitePal https://github.com/LitePalFramework/LitePal
+
+    implementation("com.squareup.okhttp3:okhttp:4.4.0")
+    //OkHttp     https://github.com/square/okhttp
+
+    implementation 'com.google.code.gson:gson:2.8.6'
+    //GSON库 https://github.com/google/gson
+
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    //Glide
 }
