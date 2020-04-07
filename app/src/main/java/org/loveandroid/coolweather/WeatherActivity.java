@@ -1,13 +1,27 @@
 package org.loveandroid.coolweather;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.SharedPreferencesCompat;
+import androidx.core.view.GravityCompat;
+import androidx.core.widget.NestedScrollView;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -26,7 +40,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
-    private ScrollView weatherLayout;
+    private NestedScrollView weatherLayout;
     private TextView titleCity;
     private TextView titleUpdateTime;
     private TextView degreeText;
@@ -37,11 +51,28 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView comfortText;
     private TextView carWashText;
     private TextView sportText;
+    private SwipeRefreshLayout srl;
+    private Toolbar mToolbar;
+    private DrawerLayout drawerLayout;
+    private FrameLayout frameLayout;
+
+    private Weather weather = null;
+    private String weatherId = null;
+
+    private FragmentManager manager;
+    private FragmentTransaction transaction;
+    private Button qiehuan;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
+        manager= getSupportFragmentManager();
+        transaction= manager.beginTransaction();
+
+        mToolbar = findViewById(R.id.weather_toolbar);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle("");
 
         weatherLayout = findViewById(R.id.weather_layout);
         titleCity = findViewById(R.id.title_city);
@@ -54,20 +85,78 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText = findViewById(R.id.comfort_text);
         carWashText = findViewById(R.id.car_wash_text);
         sportText = findViewById(R.id.sport_text);
+        srl = findViewById(R.id.srl);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        frameLayout = findViewById(R.id.choose_frame_layout);
+        qiehuan = findViewById(R.id.qiehuan);
+        qiehuan.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                qiehuan.setVisibility(View.GONE);
+                SharedPreferences preferences= getSharedPreferences("boyQ",MODE_PRIVATE);
+                preferences.edit().remove("weather").apply();
+                frameLayout.setVisibility(View.VISIBLE);
+                drawerLayout.openDrawer(GravityCompat.START);
+
+                ChooseAreaFragment fragment = new ChooseAreaFragment();
+                transaction.replace(R.id.choose_frame_layout,fragment);
+                transaction.commit();
+
+            }
+        });
+
+        srl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if(weather != null) {
+                    String weatherId = weather.basic.weatherId;
+                    requestWeatherInfo(weatherId);
+                    srl.setRefreshing(false);
+
+                }
+            }
+        });
 
         SharedPreferences preferences = getSharedPreferences("boyQ", MODE_PRIVATE);
 
         String weatherString = preferences.getString("weather",null);
-        Weather weather = null;
-        String weatherId = null;
+
         if(weatherString != null){
             weather = Utility.handleWeatherResponse(weatherString);
+            Log.d("one more time",weatherString+"");
             showWeatherInfo(weather);
         }else{
             weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeatherInfo(weatherId);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater =getMenuInflater();
+        menuInflater.inflate(R.menu.weather_toolber,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+       switch (item.getItemId()){
+           case R.id.select_city:
+               qiehuan.setVisibility(View.GONE);
+                SharedPreferences preferences= getSharedPreferences("boyQ",MODE_PRIVATE);
+                preferences.edit().remove("weather").apply();
+                frameLayout.setVisibility(View.VISIBLE);
+                drawerLayout.openDrawer(GravityCompat.START);
+
+                ChooseAreaFragment fragment = new ChooseAreaFragment();
+                transaction.replace(R.id.choose_frame_layout,fragment);
+                transaction.commit();
+
+                break;
+       }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void requestWeatherInfo(final String weaherId){
@@ -82,7 +171,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 final String responseText = response.body().string();
-                final Weather weather = Utility.handleWeatherResponse(responseText);
+                weather = Utility.handleWeatherResponse(responseText);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
