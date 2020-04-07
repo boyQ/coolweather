@@ -16,6 +16,8 @@
         android:background="@mipmap/bg"
         tools:context=".WeatherActivity">
 
+
+
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -69,7 +71,21 @@
         android:layout_height="match_parent"
         android:background="#0fff"
         android:layout_gravity="start">
+        <ImageView
+            android:id="@+id/weather_bg"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+        <TextView
+            android:layout_marginTop="300dp"
+            android:text="每日一图"
+            android:textColor="#000"
+            android:textSize="24sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            />
         <Button
+            android:layout_marginTop="340dp"
             android:id="@+id/qiehuan"
             android:text="切换城市"
             android:layout_width="match_parent"

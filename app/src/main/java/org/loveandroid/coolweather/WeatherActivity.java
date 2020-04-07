@@ -3,6 +3,7 @@ package org.loveandroid.coolweather;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.SharedPreferencesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.core.widget.NestedScrollView;
@@ -12,6 +13,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,14 +24,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import org.jetbrains.annotations.NotNull;
 import org.loveandroid.coolweather.gson.Forecast;
 import org.loveandroid.coolweather.gson.Weather;
+import org.loveandroid.coolweather.service.AutoUpdateService;
 import org.loveandroid.coolweather.util.HttpUtil;
 import org.loveandroid.coolweather.util.Utility;
 
@@ -222,6 +228,15 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
+        ImageView weatherBg = findViewById(R.id.weather_bg);
+        SharedPreferences preferences = getSharedPreferences("boyQ",MODE_PRIVATE);
+        String imgUrl = preferences.getString("pic",null);
+        if(imgUrl != null){
+            Glide.with(this).load(imgUrl).into(weatherBg);
+        }
     }
 
 }
